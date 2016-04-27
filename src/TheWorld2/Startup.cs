@@ -32,11 +32,13 @@ namespace TheWorld2
                 .AddSqlServer()
                 .AddDbContext<WorldContext>();
 
-            services.AddScoped<IMailService, DebugMailService>(); // DI declaration
+            // DI declaration
+            services.AddScoped<IMailService, DebugMailService>();
+            services.AddTransient<WorldContextSeedData>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, WorldContextSeedData seeder)
         {
             // if deploying in IIS, use this
             //app.UseIISPlatformHandler();
@@ -56,6 +58,8 @@ namespace TheWorld2
                     defaults: new {controller = "App", action = "Index"}
                 );
             });
+
+            seeder.SeedData();
         }
 
         // Entry point for the application.
