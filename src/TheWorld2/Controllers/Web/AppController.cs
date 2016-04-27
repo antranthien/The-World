@@ -11,18 +11,18 @@ namespace TheWorld2.Controllers.Web
     public class AppController : Controller
     {
         private IMailService _mailService;
-        private WorldContext _context;
+        private IWorldRepository _repository;
 
-        public AppController(IMailService service, WorldContext context)
+        public AppController(IMailService service, IWorldRepository repository)
         {
             _mailService = service;
-            _context = context;
+            _repository = repository;
         }
         // GET: /<controller>/
         public IActionResult Index()
         {
-            var trips = _context.Trips.ToList();
-            return View();
+            var trips = _repository.GetAllTrips();
+            return View(trips);
         }
 
         public IActionResult About()

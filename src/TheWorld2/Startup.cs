@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using TheWorld2.Models;
 using TheWorld2.Services;
@@ -27,6 +28,10 @@ namespace TheWorld2
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            // Add Logging
+            services.AddLogging();
+
             // EF declaration
             services.AddEntityFramework()
                 .AddSqlServer()
@@ -34,11 +39,12 @@ namespace TheWorld2
 
             // DI declaration
             services.AddScoped<IMailService, DebugMailService>();
+            services.AddScoped<IWorldRepository, WorldRepository>();
             services.AddTransient<WorldContextSeedData>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, WorldContextSeedData seeder)
+        public void Configure(IApplicationBuilder app, WorldContextSeedData seeder, ILoggerFactory logger)
         {
             // if deploying in IIS, use this
             //app.UseIISPlatformHandler();
@@ -46,6 +52,7 @@ namespace TheWorld2
             // search for a index.html file in root folder by default
             //app.UseDefaultFiles();
 
+            logger.AddDebug(LogLevel.Warning);
 
             // We want to use a static HTML file by default
             app.UseStaticFiles();
