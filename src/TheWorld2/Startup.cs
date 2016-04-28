@@ -66,6 +66,7 @@ namespace TheWorld2
             Mapper.Initialize(config =>
             {
                 config.CreateMap<Trip, TripViewModel>().ReverseMap();
+                config.CreateMap<Stop, StopViewModel>().ReverseMap();
             });
 
             app.UseMvc(config => // config the route

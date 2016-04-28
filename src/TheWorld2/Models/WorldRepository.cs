@@ -17,6 +17,12 @@ namespace TheWorld2.Models
             _context = context;
             _logger = logger;
         }
+
+        public void AddTrip(Trip newTrip)
+        {
+            _context.Add(newTrip);
+        }
+
         public IEnumerable<Trip> GetAllTrips()
         {
             try
@@ -47,6 +53,26 @@ namespace TheWorld2.Models
                 return null;
             }
             
+        }
+
+        public bool SaveAll()
+        {
+            return _context.SaveChanges() > 0;
+        }
+
+        public Trip GetTripsByName(string tripName)
+        {
+            return _context.Trips
+                .Include(t => t.Stops)
+                .FirstOrDefault(t => t.Name == tripName);
+        }
+
+        public void AddStop(string tripName, Stop newStop)
+        {
+            var trip = GetTripsByName(tripName);
+
+            newStop.Order = trip.Stops.Max(s => s.Order) + 1;
+            _context.Stops.Add(newStop);
         }
     }
 }

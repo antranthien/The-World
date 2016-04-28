@@ -30,13 +30,6 @@ namespace TheWorld2.Controllers.Api
             return Json(results);
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
         // POST api/values
         [HttpPost("")]
         public JsonResult Post([FromBody]TripViewModel viewModel)
@@ -49,9 +42,13 @@ namespace TheWorld2.Controllers.Api
 
                     // save to DB
                     _logger.LogInformation("Saving a new trip");
+                    _repository.AddTrip(newTrip);
 
-                    Response.StatusCode = (int)HttpStatusCode.Created;
-                    return Json(Mapper.Map<TripViewModel>(newTrip));
+                    if (_repository.SaveAll())
+                    {
+                        Response.StatusCode = (int)HttpStatusCode.Created;
+                        return Json(Mapper.Map<TripViewModel>(newTrip));
+                    }                    
                 }
 
                 Response.StatusCode = (int)HttpStatusCode.BadRequest;
