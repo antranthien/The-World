@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNet.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json.Serialization;
 using TheWorld2.Models;
 using TheWorld2.Services;
+using TheWorld2.ViewModels;
 
 namespace TheWorld2
 {
@@ -27,7 +30,10 @@ namespace TheWorld2
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc()
+                .AddJsonOptions(opt => { // Config JSON format
+                    opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
 
             // Add Logging
             services.AddLogging();
@@ -56,6 +62,11 @@ namespace TheWorld2
 
             // We want to use a static HTML file by default
             app.UseStaticFiles();
+
+            Mapper.Initialize(config =>
+            {
+                config.CreateMap<Trip, TripViewModel>().ReverseMap();
+            });
 
             app.UseMvc(config => // config the route
             {

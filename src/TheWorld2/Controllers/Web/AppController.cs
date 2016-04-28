@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNet.Mvc;
 using System.Linq;
 using TheWorld2.Models;
 using TheWorld2.Services;
@@ -36,7 +37,7 @@ namespace TheWorld2.Controllers.Web
         }
 
         [HttpPost]
-        public IActionResult Contact(ContactViewModel model)
+        public IActionResult Contact(ContactViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
@@ -49,9 +50,9 @@ namespace TheWorld2.Controllers.Web
                 else
                 {
                     if (_mailService.SendMail(email,
-                    email,
-                    $"Contact Page from {model.Name} ({model.Email})",
-                    model.Message))
+                        email,
+                        $"Contact Page from {viewModel.Name} ({viewModel.Email})",
+                        viewModel.Message))
                     {
                         ModelState.Clear(); //Clear the entire form
                         ViewBag.Message = "Mail sent. Thanks";
