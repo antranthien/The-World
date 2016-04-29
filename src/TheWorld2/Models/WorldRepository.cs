@@ -60,16 +60,17 @@ namespace TheWorld2.Models
             return _context.SaveChanges() > 0;
         }
 
-        public Trip GetTripsByName(string tripName)
+        public Trip GetTripsByName(string tripName, string userName)
         {
             return _context.Trips
+                .Where(t => t.UserName == userName)
                 .Include(t => t.Stops)
                 .FirstOrDefault(t => t.Name == tripName);
         }
 
-        public void AddStop(string tripName, Stop newStop)
+        public void AddStop(string tripName, Stop newStop, string userName)
         {
-            var trip = GetTripsByName(tripName);
+            var trip = GetTripsByName(tripName, userName);
 
             if (trip.Stops.Count == 0)
             {
@@ -82,6 +83,23 @@ namespace TheWorld2.Models
             
             trip.Stops.Add(newStop);
             _context.Stops.Add(newStop);
+        }
+
+        public IEnumerable<Trip> GetUserTripsWithStops(string name)
+        {
+            try
+            {
+                return _context.Trips
+                .Where(t => t.UserName == name)
+                .Include(t => t.Stops)
+                .OrderBy(t => t.Name)
+                .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Could not load the Trip list with stops for user {name}", ex);
+                return null;
+            }
         }
     }
 }

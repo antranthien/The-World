@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -8,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Serialization;
+using System.Net;
+using System.Threading.Tasks;
 using TheWorld2.Models;
 using TheWorld2.Services;
 using TheWorld2.ViewModels;
@@ -48,6 +51,26 @@ namespace TheWorld2
                 config.User.RequireUniqueEmail = true;
                 config.Password.RequiredLength = 8;
                 config.Cookies.ApplicationCookie.LoginPath = "/Auth/Login";
+
+                // Events are callbacks that Identity allows us to override to change default behaviors
+                config.Cookies.ApplicationCookie.Events = new CookieAuthenticationEvents()
+                {
+                    // lambda supports async
+                    OnRedirectToLogin = ctx =>
+                    {
+                        if (ctx.Request.Path.StartsWithSegments("/api") &&
+                            ctx.Response.StatusCode == (int)HttpStatusCode.OK)
+                        {
+                            ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        }                 
+                        else
+                        {
+                            //this is the default behavior
+                            ctx.Response.Redirect(ctx.RedirectUri);
+                        }
+                        return Task.FromResult(0);
+                    }
+                };
             })
             .AddEntityFrameworkStores<WorldContext>();
 

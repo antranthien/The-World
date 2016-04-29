@@ -9,11 +9,13 @@ using System.Net;
 using AutoMapper;
 using TheWorld2.ViewModels;
 using TheWorld2.Services;
+using Microsoft.AspNet.Authorization;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TheWorld2.Controllers.Api
 {
+    [Authorize]
     // Walking down the tree from Trips to Stops
     [Route("api/trips/{tripName}/stops")]
     public class StopController : Controller
@@ -34,7 +36,7 @@ namespace TheWorld2.Controllers.Api
         {
             try
             {
-                var result = _repository.GetTripsByName(tripName);
+                var result = _repository.GetTripsByName(tripName, User.Identity.Name);
 
                 if(result == null)
                 {
@@ -77,7 +79,7 @@ namespace TheWorld2.Controllers.Api
                     newStop.Latitude = coordinateResult.Latitude;
 
                     // save to DB
-                    _repository.AddStop(tripName, newStop);
+                    _repository.AddStop(tripName, newStop, User.Identity.Name);
 
                     if (_repository.SaveAll())
                     {
