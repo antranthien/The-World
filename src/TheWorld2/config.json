@@ -1,6 +1,7 @@
 ﻿{
   "AppSettings": {
-    "SiteEmailAddress": "antt@yahoo.com"
+    "SiteEmailAddress": "antt@yahoo.com",
+    "APIKey" : "Environmental_Variable"
   },
   "Data": {
     "ConnectionString": "Server=(localdb)\\ProjectsV13;Database=TheWorldDB;Trusted_Connection=true;Multipleactiveresultsets=true;"

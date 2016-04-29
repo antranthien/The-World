@@ -8,6 +8,7 @@ using TheWorld2.Models;
 using System.Net;
 using AutoMapper;
 using TheWorld2.ViewModels;
+using TheWorld2.Services;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,13 +18,15 @@ namespace TheWorld2.Controllers.Api
     [Route("api/trips/{tripName}/stops")]
     public class StopController : Controller
     {
-        private ILogger<TripController> _logger;
+        private CoordinateService _coorService;
+        private ILogger<StopController> _logger;
         private IWorldRepository _repository;
 
-        public StopController(IWorldRepository repository, ILogger<TripController> logger)
+        public StopController(IWorldRepository repository, ILogger<StopController> logger, CoordinateService coorService)
         {
             _repository = repository;
             _logger = logger;
+            _coorService = coorService;
         }
 
         [HttpGet("")]
@@ -51,7 +54,7 @@ namespace TheWorld2.Controllers.Api
         }
 
         [HttpPost("")]
-        public JsonResult Post(string tripName, [FromBody]StopViewModel viewModel)
+        public async Task<JsonResult> Post(string tripName, [FromBody]StopViewModel viewModel)
         {
             try
             {
@@ -61,6 +64,18 @@ namespace TheWorld2.Controllers.Api
                     var newStop = Mapper.Map<Stop>(viewModel);
 
                     // Look up Coordinates
+                    var coordinateResult = await _coorService.Lookup(newStop.Name);
+
+                    if (!coordinateResult.IsSuccess)
+                    {
+                        Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                        return Json(coordinateResult.Message);
+                    }
+
+                    newStop.Longitude = coordinateResult.Longitude;
+                    newStop.Latitude = coordinateResult.Latitude;
+
                     // save to DB
                     _repository.AddStop(tripName, newStop);
 
@@ -68,7 +83,7 @@ namespace TheWorld2.Controllers.Api
                     {
                         Response.StatusCode = (int)HttpStatusCode.Created;
                         return Json(Mapper.Map<StopViewModel>(newStop));
-                    }                  
+                    }
                 }
                 Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
