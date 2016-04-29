@@ -1,8 +1,10 @@
-﻿using Microsoft.Data.Entity;
+﻿using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Data.Entity;
 
 namespace TheWorld2.Models
 {
-    public class WorldContext : DbContext
+    //DbContext
+    public class WorldContext : IdentityDbContext<WorldUser>
     {
         // Don't rely on Database.EnsureCreated, use 'dnx ef database update' instead
         public DbSet<Trip> Trips { get; set; }

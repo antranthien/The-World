@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,10 +32,24 @@ namespace TheWorld2
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
-                .AddJsonOptions(opt => { // Config JSON format
-                    opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                });
+            services.AddMvc(config =>
+            {
+                #if !DEBUG
+                    config.Filters.Add(new RequireHttpsAttribute());
+                #endif
+            })
+            .AddJsonOptions(opt => { // Config JSON format
+                opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
+
+            // Identity
+            services.AddIdentity<WorldUser, IdentityRole>(config =>
+            {
+                config.User.RequireUniqueEmail = true;
+                config.Password.RequiredLength = 8;
+                config.Cookies.ApplicationCookie.LoginPath = "/Auth/Login";
+            })
+            .AddEntityFrameworkStores<WorldContext>();
 
             // Add Logging
             services.AddLogging();
@@ -51,7 +67,7 @@ namespace TheWorld2
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, WorldContextSeedData seeder, ILoggerFactory logger)
+        public async void Configure(IApplicationBuilder app, WorldContextSeedData seeder, ILoggerFactory logger)
         {
             // if deploying in IIS, use this
             //app.UseIISPlatformHandler();
@@ -64,22 +80,26 @@ namespace TheWorld2
             // We want to use a static HTML file by default
             app.UseStaticFiles();
 
+            // Use Identity
+            app.UseIdentity();
+
             Mapper.Initialize(config =>
             {
                 config.CreateMap<Trip, TripViewModel>().ReverseMap();
                 config.CreateMap<Stop, StopViewModel>().ReverseMap();
             });
 
+            // Mvc is one of the last items to be included
             app.UseMvc(config => // config the route
             {
                 config.MapRoute(
                     name: "Default",
                     template: "{controller}/{action}/{id?}",
-                    defaults: new {controller = "App", action = "Index"}
+                    defaults: new { controller = "App", action = "Index" }
                 );
             });
 
-            seeder.SeedData();
+            await seeder.SeedData();
         }
 
         // Entry point for the application.

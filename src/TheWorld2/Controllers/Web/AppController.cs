@@ -1,6 +1,5 @@
-﻿using AutoMapper;
+﻿using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
-using System.Linq;
 using TheWorld2.Models;
 using TheWorld2.Services;
 using TheWorld2.ViewModels;
@@ -21,6 +20,12 @@ namespace TheWorld2.Controllers.Web
         }
         // GET: /<controller>/
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        [Authorize]
+        public IActionResult Trips()
         {
             var trips = _repository.GetAllTrips();
             return View(trips);

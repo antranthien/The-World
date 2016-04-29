@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,19 +9,33 @@ namespace TheWorld2.Models
     public class WorldContextSeedData
     {
         private WorldContext _context;
+        private UserManager<WorldUser> _userManager;
 
-        public WorldContextSeedData(WorldContext context)
+        public WorldContextSeedData(WorldContext context, UserManager<WorldUser> userManager) //UserManager: for User identity
         {
             _context = context;
+            _userManager = userManager;
         }
-        public void SeedData()
+        public async Task SeedData()
         {
+            if (await _userManager.FindByEmailAsync("antt@yahoo.com") == null)
+            {
+                var newUser = new WorldUser
+                {
+                    UserName = "testuser",
+                    Email = "testuser@yahoo.com"
+                };
+
+                // Use UserManager to create a user
+                await _userManager.CreateAsync(newUser, "Test!123");
+            }
             if (!_context.Trips.Any())
             {
                 var norwayTrip = new Trip()
                 {
                     Name = "Norway Trip",
                     Created = DateTime.UtcNow,
+                    UserName = "testuser",
                     Stops = new List<Stop>()
                     {
                         new Stop()
@@ -53,6 +68,7 @@ namespace TheWorld2.Models
                 {
                     Name = "Scandinavia Trip",
                     Created = DateTime.UtcNow,
+                    UserName = "testuser",
                     Stops = new List<Stop>()
                     {
                         new Stop()
@@ -77,7 +93,7 @@ namespace TheWorld2.Models
                 _context.Trips.Add(scandinaviaTrip);
                 _context.Stops.AddRange(scandinaviaTrip.Stops);
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }
