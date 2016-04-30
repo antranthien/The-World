@@ -27,8 +27,7 @@ namespace TheWorld2.Controllers.Web
         [Authorize]
         public IActionResult Trips()
         {
-            var trips = _repository.GetAllTrips();
-            return View(trips);
+            return View();
         }
 
         public IActionResult About()
