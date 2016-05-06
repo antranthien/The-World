@@ -90,7 +90,10 @@ namespace TheWorld2
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, WorldContextSeedData seeder, ILoggerFactory logger)
+        public async void Configure(IApplicationBuilder app, 
+            WorldContextSeedData seeder, 
+            ILoggerFactory logger,
+            IHostingEnvironment env)
         {
             // if deploying in IIS, use this
             //app.UseIISPlatformHandler();
@@ -98,7 +101,18 @@ namespace TheWorld2
             // search for a index.html file in root folder by default
             //app.UseDefaultFiles();
 
-            logger.AddDebug(LogLevel.Warning);
+            if (env.IsDevelopment())
+            {
+                logger.AddDebug(LogLevel.Information);
+                // add middleware
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                logger.AddDebug(LogLevel.Error);
+                app.UseExceptionHandler("/App/Error");
+            }
+           
 
             // We want to use a static HTML file by default
             app.UseStaticFiles();
