@@ -35,12 +35,17 @@ namespace TheWorld2
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(config =>
-            {
-                #if !DEBUG
-                    config.Filters.Add(new RequireHttpsAttribute());
-                #endif
-            })
+            //services.AddMvc(config =>
+            //{
+            //    #if !DEBUG
+            //        config.Filters.Add(new RequireHttpsAttribute());
+            //    #endif
+            //})
+            //.AddJsonOptions(opt => { // Config JSON format
+            //    opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            //});
+
+            services.AddMvc()
             .AddJsonOptions(opt => { // Config JSON format
                 opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
