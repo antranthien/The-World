@@ -18,7 +18,7 @@ namespace TheWorld2.Models
         }
         public async Task SeedData()
         {
-            if (await _userManager.FindByEmailAsync("antt@yahoo.com") == null)
+            if (await _userManager.FindByEmailAsync("testuser@yahoo.com") == null)
             {
                 var newUser = new WorldUser
                 {
